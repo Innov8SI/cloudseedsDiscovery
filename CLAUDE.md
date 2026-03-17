@@ -153,16 +153,33 @@ Generated in 3 formats: `scorecard.md`, `scorecard.html`, `scorecard.docx`
 
 - **Always use multiple agents and subagents** to maximize throughput and minimize latency
 - When a task has independent subtasks (e.g., mapping multiple workflows, scoring multiple wastes, generating multiple output formats), launch them as **parallel agents**
-- Use the `Agent` tool with appropriate `subagent_type` for specialized work:
-  - `Explore` — for codebase/file searches and discovery
-  - `Plan` — for designing implementation strategies
-  - `general-purpose` — for complex multi-step tasks (research, generation, analysis)
-- When generating the scorecard, run MD, HTML, and DOCX generation as **parallel agents**
-- When identifying wastes across multiple workflows, run TIMWOODS analysis on each workflow in **parallel**
-- When scoring wastes, parallelize scoring calculations across waste categories
 - Prefer launching **multiple agents in a single message** rather than sequentially
 - Use `run_in_background: true` for agents whose results are not immediately needed
 - Never do sequentially what can be done in parallel
+
+### Available Specialist Agents (`agents/`)
+
+| Agent | File | Use For |
+|---|---|---|
+| Mermaid Diagrammer | `agents/mermaid-diagrammer.md` | Generating and validating all Mermaid diagrams (flowcharts, quadrants, sequences, gantt) |
+| Workflow Analyst | `agents/workflow-analyst.md` | Deep process decomposition, TIMWOODS waste identification, step-by-step analysis |
+| Presentation Builder | `agents/presentation-builder.md` | Client-ready HTML/MD slide decks, executive summaries, one-page dashboards |
+| Transcript Reader | `agents/transcript-reader.md` | Parsing meeting transcripts, call recordings, extracting workflow data from conversations |
+| Voice Reader | `agents/voice-reader.md` | Processing voice/dictated input, cleaning up spoken language, multilingual handling (HR/EN) |
+| Scorecard Generator | `agents/scorecard-generator.md` | Compiling final scorecards in MD/HTML/DOCX with ROI calculations |
+| Data Collector | `agents/data-collector.md` | Structured Q&A, gathering client info, validating completeness, tracking collection status |
+| Slovenian Linguist | `agents/slovenian-linguist.md` | Slovenian transcript parsing, dialect handling, SL↔EN terminology, cultural context interpretation |
+
+### When to Use Which Agent
+
+- **User describes a process verbally or in text** → Voice Reader (if spoken/dictated) or Workflow Analyst (if written)
+- **User provides a transcript** → Transcript Reader → then Workflow Analyst for analysis
+- **Slovenian transcript or input** → Slovenian Linguist first (normalize + extract) → then Transcript Reader or Workflow Analyst
+- **Workflow needs a diagram** → Mermaid Diagrammer
+- **Waste identification needed** → Workflow Analyst (TIMWOODS pass)
+- **Scoring complete, need deliverable** → Scorecard Generator + Presentation Builder (parallel)
+- **Missing information** → Data Collector drives the next question
+- **Multiple workflows to process** → Launch parallel Workflow Analyst agents, one per workflow
 
 ---
 
