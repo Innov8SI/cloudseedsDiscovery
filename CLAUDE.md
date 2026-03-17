@@ -146,6 +146,14 @@ Generated in 3 formats: `scorecard.md`, `scorecard.html`, `scorecard.docx`
 - After each workflow is complete, ask: "Ready to map another workflow, or shall we move to scoring?"
 - Do not generate the scorecard until the user explicitly runs `/waste-scorecard`
 - Use the hourly rate from `session.json` for all ROI calculations
+- **Financial sanity checks — MANDATORY on every scoring and scorecard:**
+  - Total identified waste cost MUST NOT exceed `annual_revenue`
+  - Total waste hours MUST NOT exceed `employee_count × 220 days × 8 hours` (total available labor)
+  - Total savings opportunity MUST NOT exceed `total_annual_labor_cost`
+  - No single waste item's annual cost should exceed 50% of `annual_revenue` — flag as "needs validation"
+  - If any check fails, flag it clearly: "This waste estimate exceeds the client's financial capacity — review assumptions"
+  - Always show waste as a % of revenue and % of labor cost for executive context
+  - Use `financials.currency` for all monetary output (not hardcoded $)
 
 ---
 
@@ -193,12 +201,25 @@ Generated in 3 formats: `scorecard.md`, `scorecard.html`, `scorecard.docx`
   "industry": "Logistics / Healthcare / etc",
   "analyst": "Your Name",
   "started": "2025-01-15",
-  "hourly_rate": 75,
+  "financials": {
+    "currency": "EUR",
+    "annual_revenue": 10000000,
+    "ebitda": 1500000,
+    "ebitda_margin_pct": 15,
+    "employee_count": 50,
+    "avg_monthly_salary": 3000,
+    "total_annual_labor_cost": 1800000
+  },
+  "hourly_rate": 20.45,
   "workflows_mapped": [],
   "wastes_identified": 0,
   "status": "mapping | scoring | complete"
 }
 ```
+
+**Derived fields:**
+- `total_annual_labor_cost` = employee_count × avg_monthly_salary × 12
+- `hourly_rate` = (avg_monthly_salary × 12) / (220 days × 8 hours) — if not explicitly provided
 
 **waste-log.md row format:**
 ```

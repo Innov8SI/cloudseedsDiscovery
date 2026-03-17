@@ -123,10 +123,28 @@ Highest total ROI, may require more investment. Include:
 
 ---
 
+## Financial Sanity Checks
+
+Before finalizing any scorecard, validate against `session.json` financials:
+
+| Check | Rule | If Violated |
+|---|---|---|
+| Revenue cap | Total waste cost < annual_revenue | Flag: "Waste estimate exceeds client revenue — review assumptions" |
+| Labor cap | Total waste hours < employee_count × 220 × 8 | Flag: "Waste hours exceed total available labor" |
+| Savings cap | Total savings < total_annual_labor_cost | Flag: "Savings exceed total labor cost — unrealistic" |
+| Single waste cap | No single waste > 50% of annual_revenue | Flag: "Needs validation — single waste exceeds 50% of revenue" |
+
+Always include in Executive Summary:
+- Waste as **% of annual revenue** (e.g., "Waste = 19.8% of revenue")
+- Waste as **% of total labor cost** (e.g., "Waste = 110% of labor — indicates overcounting or shared effort")
+- Use `financials.currency` for all monetary values
+
+---
+
 ## Quality Rules
 
 - Double-check all math — ROI numbers must be consistent across sections
-- If hourly rate is missing, default to $75 and flag it
+- If hourly rate is missing, calculate from avg_monthly_salary: `(salary × 12) / (220 × 8)`. If salary also missing, default to $75 and flag it
 - If a waste has no score, exclude from ROI but include in inventory with "Unscored" note
 - Sort ROI table by savings descending
 - Ensure all waste IDs are unique and consistent across sections

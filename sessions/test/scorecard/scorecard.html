@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lean Waste Scorecard — Test Client</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Instrument+Serif:ital@1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 15mm; }
+  @media print {
+    .page-break { page-break-before: always; }
+    body { font-size: 11px; }
+    .no-print { display: none; }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #060606;
+    color: #F2EDE4;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 40px;
+  }
+
+  /* Typography */
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 48px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: #F2EDE4;
+    margin-bottom: 4px;
+  }
+  h2 {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 28px;
+    font-weight: 400;
+    color: #F2EDE4;
+    margin: 48px 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #222;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: #888;
+    margin: 24px 0 12px 0;
+  }
+  h4 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #F2EDE4;
+    margin-bottom: 8px;
+  }
+
+  /* Header */
+  .header {
+    border-bottom: 1px solid #222;
+    padding-bottom: 24px;
+    margin-bottom: 40px;
+  }
+  .header .subtitle {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #CCFF33;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    margin-bottom: 4px;
+  }
+  .header .meta {
+    color: #555;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 8px;
+  }
+
+  /* KPI Cards */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .kpi-card {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 2px;
+    padding: 20px;
+    text-align: left;
+  }
+  .kpi-card .kpi-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #555;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .kpi-card .kpi-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px;
+    font-weight: 500;
+    color: #F2EDE4;
+    line-height: 1.1;
+  }
+  .kpi-card .kpi-change {
+    font-size: 12px;
+    margin-top: 6px;
+  }
+  .kpi-card .kpi-change.danger { color: #FF4444; }
+  .kpi-card .kpi-change.accent { color: #CCFF33; }
+  .kpi-card .kpi-change.success { color: #44CC88; }
+  .kpi-card .kpi-change.warning { color: #FFAA00; }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 24px 0;
+    font-size: 13px;
+  }
+  thead th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #555;
+    border-bottom: 1px solid #222;
+    font-weight: 500;
+  }
+  tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #1a1a1a;
+    color: #F2EDE4;
+  }
+  tbody tr:hover { background: #1a1a1a; }
+  tbody td strong { font-weight: 500; }
+  .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+  .totals-row { background: #111 !important; }
+  .totals-row td { font-weight: 500; border-top: 1px solid #333; }
+
+  /* Tier badges */
+  .tier-quick {
+    background: rgba(255, 68, 68, 0.15);
+    color: #FF4444;
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    border: 1px solid rgba(255, 68, 68, 0.3);
+  }
+  .tier-medium {
+    background: rgba(255, 170, 0, 0.15);
+    color: #FFAA00;
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    border: 1px solid rgba(255, 170, 0, 0.3);
+  }
+  .tier-low {
+    background: rgba(136, 136, 136, 0.15);
+    color: #888;
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    border: 1px solid rgba(136, 136, 136, 0.3);
+  }
+
+  /* Cards */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 16px 0 24px 0;
+  }
+  .card {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 2px;
+    padding: 20px;
+    border-left: 3px solid transparent;
+  }
+  .card.quick-win { border-left-color: #FF4444; }
+  .card.big-bet { border-left-color: #CCFF33; }
+  .card-badge {
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+  .card.quick-win .card-badge { color: #FF4444; }
+  .card.big-bet .card-badge { color: #CCFF33; }
+  .card-title {
+    font-weight: 500;
+    color: #F2EDE4;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  .card-stat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    color: #CCFF33;
+    line-height: 1.1;
+  }
+  .card-stat-label {
+    font-size: 11px;
+    color: #555;
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: #888;
+    margin-top: 12px;
+    line-height: 1.5;
+  }
+  .card-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #555;
+    margin-top: 10px;
+  }
+
+  /* Roadmap */
+  .roadmap {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .roadmap-phase {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 2px;
+    padding: 20px;
+    border-top: 3px solid transparent;
+  }
+  .roadmap-phase.p1 { border-top-color: #FF4444; }
+  .roadmap-phase.p2 { border-top-color: #FFAA00; }
+  .roadmap-phase.p3 { border-top-color: #CCFF33; }
+  .roadmap-phase .phase-savings {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 12px;
+  }
+  .roadmap-phase.p1 .phase-savings { color: #FF4444; }
+  .roadmap-phase.p2 .phase-savings { color: #FFAA00; }
+  .roadmap-phase.p3 .phase-savings { color: #CCFF33; }
+  .roadmap-phase ul {
+    padding-left: 16px;
+    font-size: 13px;
+    color: #888;
+  }
+  .roadmap-phase li { margin-bottom: 6px; }
+  .roadmap-phase li strong { color: #F2EDE4; font-weight: 500; }
+
+  /* Mermaid */
+  .mermaid-container {
+    background: #0a0a0a;
+    border: 1px solid #222;
+    border-radius: 2px;
+    padding: 32px;
+    margin: 16px 0;
+    overflow-x: auto;
+    position: relative;
+  }
+  .mermaid-container .mermaid {
+    display: flex;
+    justify-content: center;
+  }
+  .mermaid-container .mermaid svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Fullscreen button */
+  .fullscreen-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #888;
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.2s ease;
+  }
+  .fullscreen-btn:hover {
+    background: #222;
+    color: #CCFF33;
+    border-color: #CCFF33;
+  }
+
+  /* Fullscreen overlay */
+  .mermaid-fullscreen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #060606;
+    z-index: 9999;
+    overflow: hidden;
+    cursor: grab;
+    user-select: none;
+  }
+  .mermaid-fullscreen.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mermaid-fullscreen .mermaid-inner {
+    transform-origin: center center;
+    display: flex;
+    justify-content: center;
+    will-change: transform;
+  }
+  .mermaid-fullscreen .mermaid-inner svg {
+    max-width: none;
+    width: auto;
+    height: auto;
+  }
+  .fullscreen-close {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #888;
+    padding: 8px 16px;
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    z-index: 10000;
+    transition: all 0.2s ease;
+  }
+  .fullscreen-close:hover {
+    color: #FF4444;
+    border-color: #FF4444;
+  }
+  .fullscreen-hint {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a1a;
+    border: 1px solid #222;
+    color: #555;
+    padding: 6px 16px;
+    border-radius: 2px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    z-index: 10000;
+  }
+
+  /* Section note */
+  .section-note {
+    background: #111;
+    border-left: 3px solid #CCFF33;
+    padding: 14px 18px;
+    border-radius: 0 2px 2px 0;
+    font-size: 13px;
+    margin: 12px 0 24px 0;
+    color: #888;
+  }
+  .section-note strong { color: #F2EDE4; font-weight: 500; }
+
+  /* Footer */
+  .footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid #222;
+    text-align: center;
+    color: #555;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Accent text */
+  .lime { color: #CCFF33; }
+  .red { color: #FF4444; }
+  .amber { color: #FFAA00; }
+  .green { color: #44CC88; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="subtitle">Lean Waste Analysis</div>
+  <h1>Test Client Scorecard</h1>
+  <div class="meta">Analyst: Claude &nbsp;&middot;&nbsp; 2026-03-17 &nbsp;&middot;&nbsp; Logistics &nbsp;&middot;&nbsp; Status: Scoring Complete</div>
+</div>
+
+<!-- 1. EXECUTIVE SUMMARY -->
+<h2>Executive Summary</h2>
+
+<div class="section-note">
+  Across <strong>1 workflow</strong> (Order Fulfillment), we identified <strong>11 waste instances</strong> consuming an estimated
+  <strong>26,400 hours/year</strong> in direct labor. Automation and process improvement can recover approximately
+  <strong class="lime">$1.29M/year</strong> in savings &mdash; equivalent to <strong>8.3 FTEs</strong>.
+</div>
+
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-label">Workflows Analyzed</div>
+    <div class="kpi-value">1</div>
+    <div class="kpi-change accent">Order Fulfillment</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Annual Waste Hours</div>
+    <div class="kpi-value">26,400</div>
+    <div class="kpi-change danger">8.3 FTEs consumed</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Annual Waste Cost</div>
+    <div class="kpi-value">$1.98M</div>
+    <div class="kpi-change danger">@ $75/hr rate</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Savings Opportunity</div>
+    <div class="kpi-value">$1.29M</div>
+    <div class="kpi-change accent">65% recoverable</div>
+  </div>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-label">Wastes Identified</div>
+    <div class="kpi-value">11</div>
+    <div class="kpi-change warning">across TIMWOODS</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Quick Wins / Big Bets</div>
+    <div class="kpi-value">4</div>
+    <div class="kpi-change danger">score &ge; 4.0</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Medium Priority</div>
+    <div class="kpi-value">7</div>
+    <div class="kpi-change warning">score 2.5&ndash;3.9</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Phase 1 Payback</div>
+    <div class="kpi-value">2-4mo</div>
+    <div class="kpi-change success">$585K/yr savings</div>
+  </div>
+</div>
+
+<!-- 2. WORKFLOW INVENTORY -->
+<h2>Workflow Inventory</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Workflow</th>
+      <th>Actors</th>
+      <th>Systems</th>
+      <th>Volume</th>
+      <th>Cycle Time</th>
+      <th>Defect Rate</th>
+      <th>Wastes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="mono">01</td>
+      <td><strong>Order Fulfillment</strong></td>
+      <td>Customer, Sales Rep, Warehouse Team, Warehouse Lead, Packing Team</td>
+      <td>Email, SAP, ShipStation</td>
+      <td class="mono">400/wk</td>
+      <td class="mono">68 min</td>
+      <td><span class="red mono">15%</span></td>
+      <td class="mono">11</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Order Fulfillment &mdash; Process Map</h3>
+<div class="mermaid-container" id="flowchart-container">
+<button class="fullscreen-btn" onclick="openFullscreen('flowchart-container')">Fullscreen</button>
+<pre class="mermaid">
+flowchart LR
+  classDef wait fill:#332D00,stroke:#FFAA00,color:#FFAA00
+  classDef system fill:#0D1F0D,stroke:#CCFF33,color:#CCFF33
+  classDef decision fill:#1F0D0D,stroke:#FF4444,color:#FF4444
+
+  subgraph Customer["Customer"]
+    C1[Send order via email]
+  end
+
+  subgraph SalesRep["Sales Rep"]
+    S1["Enter order into SAP\n15 min"]
+    S2["Send shipping\nconfirmation email\n5 min"]
+  end
+
+  subgraph SAP["SAP"]
+    SA1[Generate pick list]:::system
+    SA2["Order status updated\n3 min"]:::system
+  end
+
+  subgraph WarehouseTeam["Warehouse Team"]
+    W1["Print & walk pick\nlist to warehouse"]:::wait
+    W2["Pick items\n20 min"]
+  end
+
+  subgraph WarehouseLead["Warehouse Lead"]
+    WL1{Pick matches order?}:::decision
+  end
+
+  subgraph PackingTeam["Packing Team"]
+    P1["Pack order\n10 min"]
+  end
+
+  subgraph ShipStation["ShipStation"]
+    SS1["Re-enter address\ncreate label\n5 min"]:::system
+  end
+
+  C1 -->|"Email order"| S1
+  S1 -->|"Order entered"| SA1
+  SA1 -->|"Pick list printed"| W1
+  W1 --> W2
+  W2 -->|"Items picked"| WL1
+  WL1 -->|"No — 15%"| W2
+  WL1 -->|"Yes — 85%"| P1
+  P1 -->|"Packed"| SS1
+  SS1 -->|"Label created"| SA2
+  SA2 -->|"Status updated"| S2
+</pre>
+</div>
+
+<!-- 3. WASTE INVENTORY -->
+<div class="page-break"></div>
+<h2>Waste Inventory</h2>
+
+<div class="section-note">
+  All 11 wastes scored using weighted model: Frequency (25%), Time Cost (30%), Automation Potential (25%), Business Impact (20%).
+  Tier thresholds: <strong class="red">4.0&ndash;5.0</strong> = Quick Win / Big Bet, <strong class="amber">2.5&ndash;3.9</strong> = Medium Priority.
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Freq</th>
+      <th>Time</th>
+      <th>Auto</th>
+      <th>Biz</th>
+      <th>Score</th>
+      <th>Tier</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="mono">W009</td>
+      <td><span class="lime">S</span> Skills</td>
+      <td>Sales reps spend 20 min/order on data entry + emails &mdash; 4.4 FTEs of selling capacity consumed</td>
+      <td class="mono">5</td><td class="mono">5</td><td class="mono">5</td><td class="mono">4</td>
+      <td class="mono"><strong class="lime">4.55</strong></td>
+      <td><span class="tier-quick">Quick Win</span></td>
+    </tr>
+    <tr>
+      <td class="mono">W001</td>
+      <td><span class="lime">M</span> Motion</td>
+      <td>Sales rep manually re-keys entire order from email into SAP &mdash; 15 min pure motion waste</td>
+      <td class="mono">5</td><td class="mono">5</td><td class="mono">5</td><td class="mono">4</td>
+      <td class="mono"><strong class="lime">4.55</strong></td>
+      <td><span class="tier-quick">Quick Win</span></td>
+    </tr>
+    <tr>
+      <td class="mono">W002</td>
+      <td><span class="lime">T</span> Transport</td>
+      <td>Order data transported from email to SAP via manual copy &mdash; no system integration</td>
+      <td class="mono">5</td><td class="mono">4</td><td class="mono">5</td><td class="mono">3</td>
+      <td class="mono"><strong class="lime">4.30</strong></td>
+      <td><span class="tier-quick">Quick Win</span></td>
+    </tr>
+    <tr>
+      <td class="mono">W003</td>
+      <td><span class="lime">D/M</span> Defect</td>
+      <td>Address re-entered from SAP into ShipStation manually &mdash; duplicate entry, error-prone</td>
+      <td class="mono">5</td><td class="mono">3</td><td class="mono">5</td><td class="mono">4</td>
+      <td class="mono"><strong class="lime">4.15</strong></td>
+      <td><span class="tier-quick">Quick Win</span></td>
+    </tr>
+    <tr>
+      <td class="mono">W004</td>
+      <td><span class="amber">D</span> Defects</td>
+      <td>15% of orders have pick discrepancies requiring full rework cycle (20 min re-pick)</td>
+      <td class="mono">4</td><td class="mono">4</td><td class="mono">3</td><td class="mono">5</td>
+      <td class="mono"><strong class="amber">3.95</strong></td>
+      <td><span class="tier-medium">Medium</span></td>
+    </tr>
+    <tr>
+      <td class="mono">W008</td>
+      <td><span class="amber">O</span> Overproc</td>
+      <td>Warehouse lead manually cross-references pick against SAP &mdash; barcode scanning would replace</td>
+      <td class="mono">5</td><td class="mono">3</td><td class="mono">4</td><td class="mono">4</td>
+      <td class="mono"><strong class="amber">3.95</strong></td>
+      <td><span class="tier-medium">Medium</span></td>
+    </tr>
+    <tr>
+      <td class="mono">W006</td>
+      <td><span class="amber">O</span> Overprod</td>
+      <td>Sales rep manually composes shipping confirmation email per order</td>
+      <td class="mono">5</td><td class="mono">3</td><td class="mono">5</td><td class="mono">2</td>
+      <td class="mono"><strong class="amber">3.55</strong></td>
+      <td><span class="tier-medium">Medium</span></td>
+    </tr>
+    <tr>
+      <td class="mono">W011</td>
+      <td><span class="amber">I</span> Inventory</td>
+      <td>Orders sit in email inbox &mdash; no visibility, SLA tracking, or auto-routing</td>
+      <td class="mono">4</td><td class="mono">3</td><td class="mono">4</td><td class="mono">3</td>
+      <td class="mono"><strong class="amber">3.50</strong></td>
+      <td><span class="tier-medium">Medium</span></td>
+    </tr>
+    <tr>
+      <td class="mono">W005</td>
+      <td><span class="amber">T</span> Transport</td>
+      <td>Pick list printed and physically walked to warehouse &mdash; paper-based info transport</td>
+      <td class="mono">5</td><td class="mono">2</td><td class="mono">5</td><td class="mono">2</td>
+      <td class="mono"><strong class="amber">3.25</strong></td>
+      <td><span class="tier-medium">Medium</span></td>
+    </tr>
+    <tr>
+      <td class="mono">W007</td>
+      <td><span class="amber">O</span> Overprod</td>
+      <td>Order status manually updated in SAP after label creation</td>
+      <td class="mono">5</td><td class="mono">2</td><td class="mono">5</td><td class="mono">2</td>
+      <td class="mono"><strong class="amber">3.25</strong></td>
+      <td><span class="tier-medium">Medium</span></td>
+    </tr>
+    <tr>
+      <td class="mono">W010</td>
+      <td><span class="amber">W</span> Waiting</td>
+      <td>Orders queue physically in warehouse after print &mdash; 10-30 min wait during peak</td>
+      <td class="mono">4</td><td class="mono">3</td><td class="mono">3</td><td class="mono">3</td>
+      <td class="mono"><strong class="amber">3.25</strong></td>
+      <td><span class="tier-medium">Medium</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 4. PRIORITY MATRIX -->
+<div class="page-break"></div>
+<h2>Priority Matrix</h2>
+
+<div class="section-note">
+  Impact (Business Impact &times; Frequency) vs Ease of Automation. Upper-right = Quick Wins. Upper-left = Big Bets.
+</div>
+
+<div class="mermaid-container" id="matrix-container" style="padding:24px 32px 32px;">
+<button class="fullscreen-btn" onclick="openFullscreen('matrix-container')">Fullscreen</button>
+<svg id="priority-matrix" viewBox="0 0 700 500" style="width:100%;max-width:700px;margin:0 auto;display:block;">
+  <!-- Background quadrants -->
+  <rect x="60" y="20" width="310" height="220" fill="#0D0D1F" stroke="#222" rx="2"/>
+  <rect x="370" y="20" width="310" height="220" fill="#0D1F0D" stroke="#222" rx="2"/>
+  <rect x="60" y="240" width="310" height="220" fill="#111" stroke="#222" rx="2"/>
+  <rect x="370" y="240" width="310" height="220" fill="#1F1F0D" stroke="#222" rx="2"/>
+
+  <!-- Quadrant labels -->
+  <text x="215" y="50" fill="#4488FF" font-family="DM Sans" font-size="13" font-weight="500" text-anchor="middle" opacity="0.6">BIG BETS</text>
+  <text x="525" y="50" fill="#CCFF33" font-family="DM Sans" font-size="13" font-weight="500" text-anchor="middle" opacity="0.6">QUICK WINS</text>
+  <text x="215" y="448" fill="#555" font-family="DM Sans" font-size="13" font-weight="500" text-anchor="middle" opacity="0.6">DEPRIORITIZE</text>
+  <text x="525" y="448" fill="#FFAA00" font-family="DM Sans" font-size="13" font-weight="500" text-anchor="middle" opacity="0.6">LOW-HANGING FRUIT</text>
+
+  <!-- Axes -->
+  <line x1="60" y1="230" x2="680" y2="230" stroke="#333" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="370" y1="20" x2="370" y2="460" stroke="#333" stroke-width="1" stroke-dasharray="4,4"/>
+
+  <!-- Axis labels -->
+  <text x="370" y="485" fill="#555" font-family="JetBrains Mono" font-size="10" text-anchor="middle" letter-spacing="0.1em">AUTOMATION EASE →</text>
+  <text x="15" y="230" fill="#555" font-family="JetBrains Mono" font-size="10" text-anchor="middle" letter-spacing="0.1em" transform="rotate(-90 15 230)">BUSINESS IMPACT →</text>
+
+  <!-- Data points with hover areas -->
+  <!-- W004: Defects Pick (auto=3→x:0.50, impact=5→y:0.95) -->
+  <g class="matrix-point" data-id="W004" data-desc="Defects — 15% pick rework" data-score="3.95" data-savings="$39K" data-tier="Medium">
+    <circle cx="370" cy="42" r="20" fill="transparent" class="hover-area"/>
+    <circle cx="370" cy="42" r="7" fill="#FF4444" opacity="0.9"/>
+    <circle cx="370" cy="42" r="7" fill="none" stroke="#FF4444" stroke-width="1" opacity="0.3">
+      <animate attributeName="r" values="7;14;7" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0;0.3" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <text x="370" y="38" fill="#F2EDE4" font-family="JetBrains Mono" font-size="9" text-anchor="middle" dy="-12">W004</text>
+  </g>
+
+  <!-- W009: Skills Sales (auto=5→x:0.90, impact=4→y:0.75) -->
+  <g class="matrix-point" data-id="W009" data-desc="Skills — Sales reps on clerical work (4.4 FTEs)" data-score="4.55" data-savings="$468K" data-tier="Quick Win">
+    <circle cx="618" cy="130" r="20" fill="transparent" class="hover-area"/>
+    <circle cx="618" cy="130" r="9" fill="#CCFF33" opacity="0.9"/>
+    <circle cx="618" cy="130" r="9" fill="none" stroke="#CCFF33" stroke-width="1" opacity="0.3">
+      <animate attributeName="r" values="9;18;9" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0;0.3" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <text x="618" y="126" fill="#F2EDE4" font-family="JetBrains Mono" font-size="9" text-anchor="middle" dy="-14">W009</text>
+  </g>
+
+  <!-- W001: Motion Data Entry (auto=5→x:0.90, impact=4→y:0.75) — offset slightly -->
+  <g class="matrix-point" data-id="W001" data-desc="Motion — Manual order re-keying, 15 min/order" data-score="4.55" data-savings="$351K" data-tier="Quick Win">
+    <circle cx="640" cy="110" r="20" fill="transparent" class="hover-area"/>
+    <circle cx="640" cy="110" r="9" fill="#CCFF33" opacity="0.9"/>
+    <circle cx="640" cy="110" r="9" fill="none" stroke="#CCFF33" stroke-width="1" opacity="0.3">
+      <animate attributeName="r" values="9;18;9" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0;0.3" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <text x="640" y="106" fill="#F2EDE4" font-family="JetBrains Mono" font-size="9" text-anchor="middle" dy="-14">W001</text>
+  </g>
+
+  <!-- W003: Defect Address (auto=5→x:0.90, impact=4→y:0.75) — offset -->
+  <g class="matrix-point" data-id="W003" data-desc="Defect/Motion — Address re-entry into ShipStation" data-score="4.15" data-savings="$117K" data-tier="Quick Win">
+    <circle cx="596" cy="150" r="20" fill="transparent" class="hover-area"/>
+    <circle cx="596" cy="150" r="8" fill="#CCFF33" opacity="0.9"/>
+    <circle cx="596" cy="150" r="8" fill="none" stroke="#CCFF33" stroke-width="1" opacity="0.3">
+      <animate attributeName="r" values="8;16;8" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0;0.3" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <text x="596" y="146" fill="#F2EDE4" font-family="JetBrains Mono" font-size="9" text-anchor="middle" dy="-12">W003</text>
+  </g>
+
+  <!-- W008: Overproc Manual Verify (auto=4→x:0.70, impact=4→y:0.75) -->
+  <g class="matrix-point" data-id="W008" data-desc="Overprocessing — Manual pick verification vs SAP" data-score="3.95" data-savings="$91K" data-tier="Medium">
+    <circle cx="494" cy="130" r="20" fill="transparent" class="hover-area"/>
+    <circle cx="494" cy="130" r="7" fill="#FFAA00" opacity="0.9"/>
+    <circle cx="494" cy="130" r="7" fill="none" stroke="#FFAA00" stroke-width="1" opacity="0.3">
+      <animate attributeName="r" values="7;14;7" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.3;0;0.3" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <text x="494" y="126" fill="#F2EDE4" font-family="JetBrains Mono" font-size="9" text-anchor="middle" dy="-12">W008</text>
+  </g>
+
+  <!-- W002: Transport Email-SAP (auto=5→x:0.90, impact=3→y:0.55) -->
+  <g class="matrix-point" data-id="W002" data-desc="Transport — Email to SAP manual copy" data-score="4.30" data-savings="$281K" data-tier="Quick Win">
+    <circle cx="618" cy="230" r="20" fill="transparent" class="hover-area"/>
+    <circle cx="618" cy="230" r="8" fill="#CCFF33" opacity="0.9"/>
+    <text x="618" y="226" fill="#F2EDE4" font-family="JetBrains Mono" font-size="9" text-anchor="middle" dy="-12">W002</text>
+  </g>
+
+  <!-- W010: Waiting Queue (auto=3→x:0.50, impact=3→y:0.55) -->
+  <g class="matrix-point" data-id="W010" data-desc="Waiting — Warehouse queue, 10-30 min peak" data-score="3.25" data-savings="$65K" data-tier="Medium">
+    <circle cx="370" cy="230" r="20" fill="transparent" class="hover-area"/>
+    <circle cx="370" cy="230" r="6" fill="#FFAA00" opacity="0.9"/>
+    <text x="370" y="226" fill="#F2EDE4" font-family="JetBrains Mono" font-size="9" text-anchor="middle" dy="-12">W010</text>
+  </g>
+
+  <!-- W011: Inventory Email (auto=4→x:0.70, impact=3→y:0.55) -->
+  <g class="matrix-point" data-id="W011" data-desc="Inventory — Unmanaged email inbox queue" data-score="3.50" data-savings="$55K" data-tier="Medium">
+    <circle cx="494" cy="230" r="20" fill="transparent" class="hover-area"/>
+    <circle cx="494" cy="230" r="6" fill="#FFAA00" opacity="0.9"/>
+    <text x="494" y="226" fill="#F2EDE4" font-family="JetBrains Mono" font-size="9" text-anchor="middle" dy="-12">W011</text>
+  </g>
+
+  <!-- W005: Transport Paper (auto=5→x:0.90, impact=2→y:0.35) -->
+  <g class="matrix-point" data-id="W005" data-desc="Transport — Paper pick list walked to warehouse" data-score="3.25" data-savings="$70K" data-tier="Medium">
+    <circle cx="618" cy="316" r="20" fill="transparent" class="hover-area"/>
+    <circle cx="618" cy="316" r="6" fill="#FFAA00" opacity="0.9"/>
+    <text x="618" y="312" fill="#F2EDE4" font-family="JetBrains Mono" font-size="9" text-anchor="middle" dy="-12">W005</text>
+  </g>
+
+  <!-- W006: Overprod Confirm (auto=5→x:0.90, impact=2→y:0.35) — offset -->
+  <g class="matrix-point" data-id="W006" data-desc="Overproduction — Manual shipping confirmation emails" data-score="3.55" data-savings="$117K" data-tier="Medium">
+    <circle cx="640" cy="340" r="20" fill="transparent" class="hover-area"/>
+    <circle cx="640" cy="340" r="6" fill="#FFAA00" opacity="0.9"/>
+    <text x="640" y="336" fill="#F2EDE4" font-family="JetBrains Mono" font-size="9" text-anchor="middle" dy="-12">W006</text>
+  </g>
+
+  <!-- W007: Overprod Status (auto=5→x:0.90, impact=2→y:0.35) — offset -->
+  <g class="matrix-point" data-id="W007" data-desc="Overproduction — Manual SAP status update" data-score="3.25" data-savings="$70K" data-tier="Medium">
+    <circle cx="596" cy="356" r="20" fill="transparent" class="hover-area"/>
+    <circle cx="596" cy="356" r="5" fill="#FFAA00" opacity="0.9"/>
+    <text x="596" y="352" fill="#F2EDE4" font-family="JetBrains Mono" font-size="9" text-anchor="middle" dy="-12">W007</text>
+  </g>
+</svg>
+
+<!-- Tooltip -->
+<div id="matrix-tooltip" style="display:none;position:fixed;background:#1a1a1a;border:1px solid #333;border-radius:2px;padding:12px 16px;z-index:100;pointer-events:none;max-width:280px;">
+  <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#CCFF33;margin-bottom:4px;" id="tt-id"></div>
+  <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#F2EDE4;margin-bottom:8px;" id="tt-desc"></div>
+  <div style="display:flex;gap:16px;">
+    <div>
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#555;">Score</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:16px;color:#F2EDE4;" id="tt-score"></div>
+    </div>
+    <div>
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#555;">Savings/yr</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:16px;color:#CCFF33;" id="tt-savings"></div>
+    </div>
+    <div>
+      <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#555;">Tier</div>
+      <div style="font-size:12px;" id="tt-tier"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 5. ROI TABLE -->
+<h2>ROI Table</h2>
+
+<div class="section-note">
+  Volume = 20,800 orders/year &nbsp;&middot;&nbsp; Rate = $75/hr &nbsp;&middot;&nbsp; Automation %: score 1=20%, 2=35%, 3=50%, 4=70%, 5=90%
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>ID</th>
+      <th>Waste</th>
+      <th>Time/Order</th>
+      <th>Hours/yr</th>
+      <th>Cost/yr</th>
+      <th>Auto %</th>
+      <th>Savings/yr</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="mono">1</td>
+      <td class="mono">W009</td>
+      <td>Skills &mdash; Sales reps doing data entry + emails</td>
+      <td class="mono">20 min</td>
+      <td class="mono">6,933</td>
+      <td class="mono">$520,000</td>
+      <td class="mono lime">90%</td>
+      <td class="mono"><strong class="lime">$468,000</strong></td>
+    </tr>
+    <tr>
+      <td class="mono">2</td>
+      <td class="mono">W001</td>
+      <td>Motion &mdash; Manual order re-keying into SAP</td>
+      <td class="mono">15 min</td>
+      <td class="mono">5,200</td>
+      <td class="mono">$390,000</td>
+      <td class="mono lime">90%</td>
+      <td class="mono"><strong class="lime">$351,000</strong></td>
+    </tr>
+    <tr>
+      <td class="mono">3</td>
+      <td class="mono">W002</td>
+      <td>Transport &mdash; Email-to-SAP manual transfer</td>
+      <td class="mono">12 min</td>
+      <td class="mono">4,160</td>
+      <td class="mono">$312,000</td>
+      <td class="mono lime">90%</td>
+      <td class="mono"><strong class="lime">$280,800</strong></td>
+    </tr>
+    <tr>
+      <td class="mono">4</td>
+      <td class="mono">W003</td>
+      <td>Defect/Motion &mdash; Address re-entry ShipStation</td>
+      <td class="mono">5 min</td>
+      <td class="mono">1,733</td>
+      <td class="mono">$130,000</td>
+      <td class="mono lime">90%</td>
+      <td class="mono"><strong class="lime">$117,000</strong></td>
+    </tr>
+    <tr>
+      <td class="mono">5</td>
+      <td class="mono">W006</td>
+      <td>Overproduction &mdash; Manual shipping emails</td>
+      <td class="mono">5 min</td>
+      <td class="mono">1,733</td>
+      <td class="mono">$130,000</td>
+      <td class="mono lime">90%</td>
+      <td class="mono"><strong class="lime">$117,000</strong></td>
+    </tr>
+    <tr>
+      <td class="mono">6</td>
+      <td class="mono">W008</td>
+      <td>Overprocessing &mdash; Manual pick verification</td>
+      <td class="mono">5 min</td>
+      <td class="mono">1,733</td>
+      <td class="mono">$130,000</td>
+      <td class="mono amber">70%</td>
+      <td class="mono"><strong class="amber">$91,000</strong></td>
+    </tr>
+    <tr>
+      <td class="mono">7</td>
+      <td class="mono">W005</td>
+      <td>Transport &mdash; Paper pick list walked to warehouse</td>
+      <td class="mono">3 min</td>
+      <td class="mono">1,040</td>
+      <td class="mono">$78,000</td>
+      <td class="mono lime">90%</td>
+      <td class="mono"><strong class="lime">$70,200</strong></td>
+    </tr>
+    <tr>
+      <td class="mono">8</td>
+      <td class="mono">W007</td>
+      <td>Overproduction &mdash; Manual SAP status update</td>
+      <td class="mono">3 min</td>
+      <td class="mono">1,040</td>
+      <td class="mono">$78,000</td>
+      <td class="mono lime">90%</td>
+      <td class="mono"><strong class="lime">$70,200</strong></td>
+    </tr>
+    <tr>
+      <td class="mono">9</td>
+      <td class="mono">W010</td>
+      <td>Waiting &mdash; Warehouse queue after print</td>
+      <td class="mono">5 min</td>
+      <td class="mono">1,733</td>
+      <td class="mono">$130,000</td>
+      <td class="mono amber">50%</td>
+      <td class="mono"><strong class="amber">$65,000</strong></td>
+    </tr>
+    <tr>
+      <td class="mono">10</td>
+      <td class="mono">W011</td>
+      <td>Inventory &mdash; Unmanaged email inbox queue</td>
+      <td class="mono">3 min</td>
+      <td class="mono">1,040</td>
+      <td class="mono">$78,000</td>
+      <td class="mono amber">70%</td>
+      <td class="mono"><strong class="amber">$54,600</strong></td>
+    </tr>
+    <tr>
+      <td class="mono">11</td>
+      <td class="mono">W004</td>
+      <td>Defects &mdash; 15% pick discrepancy rework</td>
+      <td class="mono">20 min @15%</td>
+      <td class="mono">1,040</td>
+      <td class="mono">$78,000</td>
+      <td class="mono amber">50%</td>
+      <td class="mono"><strong class="amber">$39,000</strong></td>
+    </tr>
+    <tr class="totals-row">
+      <td></td>
+      <td></td>
+      <td><strong>Total (de-duplicated)</strong></td>
+      <td></td>
+      <td class="mono"><strong>~26,400</strong></td>
+      <td class="mono"><strong>~$1.98M</strong></td>
+      <td></td>
+      <td class="mono"><strong class="lime">~$1.29M</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 6. QUICK WINS -->
+<div class="page-break"></div>
+<h2>Quick Wins</h2>
+
+<h3>High impact, easy to automate &mdash; deploy in 0-3 months</h3>
+
+<div class="card-grid">
+  <div class="card quick-win">
+    <div class="card-badge">Quick Win</div>
+    <div class="card-title">W001 &mdash; Email-to-SAP Order Entry</div>
+    <div class="card-stat">$351K<span style="font-size:14px;color:#555;">/yr</span></div>
+    <div class="card-stat-label">potential savings</div>
+    <div class="card-desc">Deploy email parsing + SAP API integration. Eliminates 15 min of manual data entry per order.</div>
+    <div class="card-meta">Score: 4.55 &middot; 5,200h/yr recovered</div>
+  </div>
+  <div class="card quick-win">
+    <div class="card-badge">Quick Win</div>
+    <div class="card-title">W003 &mdash; SAP-to-ShipStation Sync</div>
+    <div class="card-stat">$117K<span style="font-size:14px;color:#555;">/yr</span></div>
+    <div class="card-stat-label">potential savings</div>
+    <div class="card-desc">API integration to auto-populate shipping address. Eliminates re-entry and address errors.</div>
+    <div class="card-meta">Score: 4.15 &middot; 1,733h/yr recovered</div>
+  </div>
+  <div class="card quick-win">
+    <div class="card-badge">Quick Win</div>
+    <div class="card-title">W006 &mdash; Auto Shipping Confirmation</div>
+    <div class="card-stat">$117K<span style="font-size:14px;color:#555;">/yr</span></div>
+    <div class="card-stat-label">potential savings</div>
+    <div class="card-desc">Auto-trigger tracking email on label creation. Zero sales rep involvement.</div>
+    <div class="card-meta">Score: 3.55 &middot; 1,733h/yr recovered</div>
+  </div>
+</div>
+
+<!-- 7. BIG BETS -->
+<h2>Big Bets</h2>
+
+<h3>High ROI, requires investment &mdash; transformational returns</h3>
+
+<div class="card-grid">
+  <div class="card big-bet">
+    <div class="card-badge">Big Bet</div>
+    <div class="card-title">W009 &mdash; Reclaim Sales Rep Capacity</div>
+    <div class="card-stat">$468K<span style="font-size:14px;color:#555;">/yr</span></div>
+    <div class="card-stat-label">potential savings (4.4 FTEs)</div>
+    <div class="card-desc">Automate order entry + confirmations. Reallocate ~4.4 FTEs to revenue-generating activity.</div>
+    <div class="card-meta">Score: 4.55 &middot; 6,933h/yr recovered</div>
+  </div>
+  <div class="card big-bet">
+    <div class="card-badge">Big Bet</div>
+    <div class="card-title">W002 &mdash; End-to-End Integration</div>
+    <div class="card-stat">$281K<span style="font-size:14px;color:#555;">/yr</span></div>
+    <div class="card-stat-label">potential savings</div>
+    <div class="card-desc">Unified integration layer: email &rarr; SAP &rarr; ShipStation. Eliminate all manual data transport.</div>
+    <div class="card-meta">Score: 4.30 &middot; 4,160h/yr recovered</div>
+  </div>
+  <div class="card big-bet">
+    <div class="card-badge">Big Bet</div>
+    <div class="card-title">W008 &mdash; Barcode Pick Verification</div>
+    <div class="card-stat">$91K<span style="font-size:14px;color:#555;">/yr</span></div>
+    <div class="card-stat-label">potential savings</div>
+    <div class="card-desc">RF/barcode scanning for pick verification. Cuts 15% defect rate, eliminates manual cross-reference.</div>
+    <div class="card-meta">Score: 3.95 &middot; 1,733h/yr recovered</div>
+  </div>
+</div>
+
+<!-- 8. ROADMAP -->
+<div class="page-break"></div>
+<h2>Recommended Roadmap</h2>
+
+<div class="roadmap">
+  <div class="roadmap-phase p1">
+    <h4>Phase 1: Quick Wins</h4>
+    <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">0 &ndash; 3 months</div>
+    <div class="phase-savings">$585K/yr</div>
+    <ul>
+      <li><strong>Email order parser</strong> &mdash; Email-to-SAP integration (W001, W002)</li>
+      <li><strong>SAP-ShipStation API</strong> &mdash; Auto-sync address + order data (W003)</li>
+      <li><strong>Auto-confirm emails</strong> &mdash; Trigger from ShipStation events (W006)</li>
+      <li><strong>SAP status webhook</strong> &mdash; Auto-update on label creation (W007)</li>
+    </ul>
+  </div>
+  <div class="roadmap-phase p2">
+    <h4>Phase 2: Process Improvement</h4>
+    <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">3 &ndash; 6 months</div>
+    <div class="phase-savings">$230K/yr</div>
+    <ul>
+      <li><strong>Digital pick lists</strong> &mdash; Mobile/tablet pick workflow (W005, W010)</li>
+      <li><strong>Order intake portal</strong> &mdash; Self-service with SLA tracking (W011)</li>
+      <li><strong>Sales redeployment</strong> &mdash; Freed capacity &rarr; selling (W009)</li>
+    </ul>
+  </div>
+  <div class="roadmap-phase p3">
+    <h4>Phase 3: Transformation</h4>
+    <div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">6 &ndash; 12 months</div>
+    <div class="phase-savings">$130K/yr</div>
+    <ul>
+      <li><strong>Barcode/RF scanning</strong> &mdash; Pick verification (W008)</li>
+      <li><strong>Defect root cause</strong> &mdash; Bin management + inventory accuracy (W004)</li>
+      <li><strong>KPI dashboard</strong> &mdash; Cycle time, defect rate, queue depth</li>
+    </ul>
+  </div>
+</div>
+
+<div class="section-note">
+  <strong>Total estimated annual savings at full implementation: <span class="lime">~$1.29M/yr</span></strong><br>
+  Payback on Phase 1 investment expected within 2&ndash;4 months based on typical integration project costs of $50K&ndash;$100K.
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>Lean Waste Analysis Scorecard &middot; Test Client &middot; Claude &middot; 2026-03-17</p>
+  <p>CloudSeeds Discovery &middot; TIMWOODS + Weighted Scoring Model</p>
+</div>
+
+<!-- Fullscreen overlay -->
+<div class="mermaid-fullscreen" id="fullscreen-overlay">
+  <button class="fullscreen-close" onclick="closeFullscreen()">ESC &middot; Close</button>
+  <div class="mermaid-inner" id="fullscreen-content"></div>
+  <div class="fullscreen-hint">Scroll to zoom &middot; Click &amp; drag to pan &middot; ESC to close</div>
+</div>
+
+<script>
+  // Mermaid init
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    flowchart: {
+      curve: 'basis',
+      padding: 20,
+      nodeSpacing: 30,
+      rankSpacing: 60,
+      htmlLabels: true,
+      useMaxWidth: false
+    },
+    themeVariables: {
+      darkMode: true,
+      background: '#0a0a0a',
+      mainBkg: '#111111',
+      nodeBorder: '#333',
+      clusterBkg: '#0D0D0D',
+      clusterBorder: '#222',
+      primaryColor: '#111',
+      primaryBorderColor: '#444',
+      primaryTextColor: '#F2EDE4',
+      lineColor: '#444',
+      secondaryColor: '#332D00',
+      tertiaryColor: '#1F0D0D',
+      fontFamily: 'DM Sans, sans-serif',
+      fontSize: '12px',
+      edgeLabelBackground: '#0a0a0a',
+      nodeTextColor: '#F2EDE4',
+      labelTextColor: '#888'
+    }
+  });
+
+  // Fullscreen functionality
+  let currentScale = 1;
+  let panX = 0, panY = 0;
+  let isDragging = false;
+  let dragStartX, dragStartY, panStartX, panStartY;
+
+  function updateTransform() {
+    const inner = document.getElementById('fullscreen-content');
+    inner.style.transform = 'translate(' + panX + 'px, ' + panY + 'px) scale(' + currentScale + ')';
+  }
+
+  function openFullscreen(containerId) {
+    const container = document.getElementById(containerId);
+    const content = container.querySelector('.mermaid, svg');
+    const overlay = document.getElementById('fullscreen-overlay');
+    const target = document.getElementById('fullscreen-content');
+
+    target.innerHTML = content.outerHTML;
+    currentScale = 1;
+    panX = 0;
+    panY = 0;
+    updateTransform();
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    // Re-render mermaid if it's a mermaid element
+    const mermaidEl = target.querySelector('.mermaid');
+    if (mermaidEl && !mermaidEl.querySelector('svg')) {
+      mermaid.run({ nodes: [mermaidEl] });
+    }
+  }
+
+  function closeFullscreen() {
+    const overlay = document.getElementById('fullscreen-overlay');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    currentScale = 1;
+    panX = 0;
+    panY = 0;
+  }
+
+  // ESC key to close
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeFullscreen();
+  });
+
+  // Scroll to zoom — zoom toward cursor position
+  document.getElementById('fullscreen-overlay').addEventListener('wheel', function(e) {
+    e.preventDefault();
+    const rect = this.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left - rect.width / 2;
+    const mouseY = e.clientY - rect.top - rect.height / 2;
+
+    const prevScale = currentScale;
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    currentScale = Math.min(Math.max(0.3, currentScale + delta), 5);
+
+    // Adjust pan so zoom centers on cursor
+    const ratio = currentScale / prevScale;
+    panX = mouseX - ratio * (mouseX - panX);
+    panY = mouseY - ratio * (mouseY - panY);
+
+    updateTransform();
+  });
+
+  // Drag to pan using translate
+  const overlay = document.getElementById('fullscreen-overlay');
+  overlay.addEventListener('mousedown', function(e) {
+    if (e.target.tagName === 'BUTTON') return;
+    isDragging = true;
+    overlay.style.cursor = 'grabbing';
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    panStartX = panX;
+    panStartY = panY;
+    e.preventDefault();
+  });
+  document.addEventListener('mouseup', function() {
+    isDragging = false;
+    overlay.style.cursor = 'grab';
+  });
+  document.addEventListener('mousemove', function(e) {
+    if (!isDragging) return;
+    panX = panStartX + (e.clientX - dragStartX);
+    panY = panStartY + (e.clientY - dragStartY);
+    updateTransform();
+  });
+
+  // Matrix tooltip
+  const tooltip = document.getElementById('matrix-tooltip');
+  document.querySelectorAll('.matrix-point').forEach(function(point) {
+    point.addEventListener('mouseenter', function(e) {
+      const d = this.dataset;
+      document.getElementById('tt-id').textContent = d.id;
+      document.getElementById('tt-desc').textContent = d.desc;
+      document.getElementById('tt-score').textContent = d.score;
+      document.getElementById('tt-savings').textContent = d.savings + '/yr';
+
+      const tierEl = document.getElementById('tt-tier');
+      tierEl.textContent = d.tier;
+      tierEl.style.color = d.tier === 'Quick Win' ? '#CCFF33' : d.tier === 'Medium' ? '#FFAA00' : '#888';
+
+      tooltip.style.display = 'block';
+    });
+    point.addEventListener('mousemove', function(e) {
+      tooltip.style.left = (e.clientX + 16) + 'px';
+      tooltip.style.top = (e.clientY - 10) + 'px';
+
+      // Keep tooltip on screen
+      const rect = tooltip.getBoundingClientRect();
+      if (rect.right > window.innerWidth) {
+        tooltip.style.left = (e.clientX - rect.width - 16) + 'px';
+      }
+      if (rect.bottom > window.innerHeight) {
+        tooltip.style.top = (e.clientY - rect.height - 10) + 'px';
+      }
+    });
+    point.addEventListener('mouseleave', function() {
+      tooltip.style.display = 'none';
+    });
+
+    // Hover glow effect
+    point.style.cursor = 'pointer';
+    point.addEventListener('mouseenter', function() {
+      const circles = this.querySelectorAll('circle:not(.hover-area)');
+      if (circles[0]) circles[0].setAttribute('opacity', '1');
+    });
+    point.addEventListener('mouseleave', function() {
+      const circles = this.querySelectorAll('circle:not(.hover-area)');
+      if (circles[0]) circles[0].setAttribute('opacity', '0.9');
+    });
+  });
+</script>
+
+</body>
+</html>

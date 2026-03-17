@@ -1,0 +1,11 @@
+{
+  "client": "Test Client",
+  "client_slug": "test",
+  "industry": "Logistics",
+  "analyst": "Claude",
+  "started": "2026-03-17",
+  "hourly_rate": 75,
+  "workflows_mapped": ["order-fulfillment"],
+  "wastes_identified": 11,
+  "status": "scoring"
+}
