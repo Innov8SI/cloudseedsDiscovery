@@ -1,0 +1,23 @@
+{
+  "client": "Futura",
+  "client_slug": "futura",
+  "industry": "Marketing Agency",
+  "analyst": "Bruno Omerovic",
+  "started": "2026-03-24",
+  "financials": {
+    "currency": "EUR",
+    "annual_revenue": 13500000,
+    "ebitda": null,
+    "ebitda_margin_pct": null,
+    "employee_count": 50,
+    "avg_monthly_salary": 3000,
+    "total_annual_labor_cost": 1800000
+  },
+  "hourly_rate": 20.45,
+  "sessions_planned": 3,
+  "sessions_completed": 0,
+  "people": [],
+  "workflows_mapped": [],
+  "wastes_identified": 0,
+  "status": "discovery"
+}
